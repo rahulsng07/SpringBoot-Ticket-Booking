@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Ticket Booking System (Spring Boot + MariaDB + Thymeleaf)
 
 ## Prereqs
@@ -24,3 +25,6 @@ mvn spring-boot:run
 ## Notes
 - JPA entities match the provided schema.
 - Thymeleaf pages provide CRUD for Users, Routes, Schedules, Seats, Bookings.
+=======
+# Tickit-Booking.Springboot
+>>>>>>> 6069d1bb0e51433036339e100d9a62ddba9d60ee
