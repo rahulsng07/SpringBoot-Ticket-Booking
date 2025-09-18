@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Bookings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+<div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 text-center text-indigo-600">📖 All Bookings</h1>
+
+    <!-- Top Action Buttons -->
+    <div class="mb-4 flex justify-between">
+        <a th:href="@{/}" 
+           class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow hover:bg-gray-600">
+            ⬅ Back to Home
+        </a>
+        <a th:href="@{/bookings/add}" 
+           class="bg-indigo-600 text-white px-4 py-2 rounded-lg shadow hover:bg-indigo-700">
+            ➕ Add Booking
+        </a>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+        <table class="min-w-full border-collapse">
+            <thead class="bg-indigo-600 text-white">
+            <tr>
+                <th class="p-3 text-left">ID</th>
+                <th class="p-3 text-left">User</th>
+                <th class="p-3 text-left">Schedule</th>
+                <th class="p-3 text-left">Seat</th>
+                <th class="p-3 text-left">Status</th>
+                <th class="p-3 text-left">Payment</th>
+                <th class="p-3 text-left">Price</th>
+                <th class="p-3 text-left">Booking Time</th>
+                <th class="p-3 text-center">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="booking : ${bookings}" class="border-b hover:bg-gray-50">
+                <td class="p-3" th:text="${booking.id}"></td>
+                <td class="p-3" th:text="${booking.user.name}"></td>
+                <td class="p-3">
+                    <span th:text="${booking.schedule.route.from}"></span> →
+                    <span th:text="${booking.schedule.route.destination}"></span> |
+                    <span th:text="${#temporals.format(booking.schedule.departureTime,'yyyy-MM-dd HH:mm')}"></span> →
+                    <span th:text="${#temporals.format(booking.schedule.arrivalTime,'yyyy-MM-dd HH:mm')}"></span>
+                </td>
+                <td class="p-3" th:text="${booking.seat.seatNumber}"></td>
+                <td class="p-3 font-semibold" 
+                    th:classappend="${booking.status=='CONFIRMED'}?'text-green-600':'text-red-600'" 
+                    th:text="${booking.status}">
+                </td>
+                <td class="p-3" th:text="${booking.paymentStatus}"></td>
+                <td class="p-3" th:text="${booking.price}"></td>
+                <td class="p-3" th:text="${#temporals.format(booking.bookingTime,'yyyy-MM-dd HH:mm')}"></td>
+
+                <!-- Actions -->
+                <td class="p-3 flex gap-2 justify-center">
+                    <!-- Edit -->
+                    <a th:href="@{'/bookings/edit/' + ${booking.id}}" 
+                       class="bg-yellow-400 text-white px-3 py-1 rounded-lg hover:bg-yellow-500">✏ Edit</a>
+
+                    <!-- Cancel -->
+                    <form th:action="@{'/bookings/cancel/' + ${booking.id}}" method="post">
+                        <button type="submit" 
+                                class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600">❌ Cancel</button>
+                    </form>
+
+                    <!-- Delete -->
+                    <form th:action="@{'/bookings/delete/' + ${booking.id}}" method="post"
+                          onsubmit="return confirm('Are you sure you want to delete this booking permanently?');">
+                        <button type="submit" 
+                                class="bg-gray-700 text-white px-3 py-1 rounded-lg hover:bg-gray-800">🗑 Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Booking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+<div class="max-w-2xl mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">
+    <h1 class="text-2xl font-bold mb-6 text-indigo-600 text-center">➕ Add Booking</h1>
+
+    <form th:action="@{/bookings/create}" method="post" class="space-y-5">
+
+        <div>
+            <label class="block font-semibold mb-1">User</label>
+            <select name="userId" class="w-full border rounded-lg p-2">
+                <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.name}"></option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block font-semibold mb-1">Schedule</label>
+            <select name="scheduleId" class="w-full border rounded-lg p-2">
+                <option th:each="s : ${schedules}" th:value="${s.id}" 
+                        th:text="${s.route.from} + ' → ' + ${s.route.destination} + ' | ' + ${#temporals.format(s.departureTime,'yyyy-MM-dd HH:mm')} + ' → ' + ${#temporals.format(s.arrivalTime,'yyyy-MM-dd HH:mm')} + ' | Price: ₹' + ${s.price}"></option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block font-semibold mb-1">Seat</label>
+            <select name="seatId" class="w-full border rounded-lg p-2">
+                <option th:each="st : ${seats}" th:value="${st.id}" th:text="${st.seatNumber}"></option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block font-semibold mb-1">Payment Status</label>
+            <select name="paymentStatus" class="w-full border rounded-lg p-2">
+                <option value="PAID">PAID</option>
+                <option value="UNPAID">UNPAID</option>
+                <option value="REFUNDED">REFUNDED</option>
+            </select>
+        </div>
+
+        <div class="flex justify-between">
+            <a th:href="@{/bookings}" class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500">⬅ Back</a>
+            <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">✅ Save</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

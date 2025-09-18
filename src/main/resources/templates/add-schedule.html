@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Schedule</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <h2 class="text-center text-success mb-4">➕ Add New Schedule</h2>
+
+    <form th:action="@{/schedules/add}" th:object="${schedule}" method="post" class="shadow p-4 bg-white rounded">
+
+        <div class="mb-3">
+            <label class="form-label">Route</label>
+            <select th:field="*{route}" class="form-select" required>
+                <option value="">-- Select Route --</option>
+                <option th:each="route : ${routes}"
+                        th:value="${route.id}"
+                        th:text="${route.from} + ' → ' + ${route.destination}">
+                </option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Departure Time</label>
+            <input type="datetime-local" th:field="*{departureTime}" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Arrival Time</label>
+            <input type="datetime-local" th:field="*{arrivalTime}" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Price (Auto Calculated)</label>
+            <input type="text" th:field="*{price}" class="form-control" readonly>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a th:href="@{/schedules}" class="btn btn-secondary">⬅ Back</a>
+            <button type="submit" class="btn btn-success">✅ Save</button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

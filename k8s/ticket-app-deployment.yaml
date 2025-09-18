@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ticket-app
+  namespace: ticket-system
+  labels:
+    app: ticket-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ticket-app
+  template:
+    metadata:
+      labels:
+        app: ticket-app
+    spec:
+      initContainers:
+        - name: wait-for-mariadb
+          image: busybox
+          command: ['sh', '-c', 'until nc -z mariadb-service 3306; do echo waiting for mariadb; sleep 3; done;']
+      containers:
+        - name: ticket-app
+          image: rahulsingh1207/ticket-booking:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "docker"
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mariadb://mariadb-service:3306/ticketdb
+            - name: SPRING_DATASOURCE_USERNAME
+              value: ticketuser
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: secret

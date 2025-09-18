@@ -1,0 +1,29 @@
+services:
+  mariadb-container:
+    image: dockerhub.timeweb.cloud/library/mariadb:11
+    container_name: mariadb-container
+    environment:
+      MYSQL_ROOT_PASSWORD: Rahul@1234
+      MYSQL_DATABASE: ticketdb
+      MYSQL_USER: ticketuser
+      MYSQL_PASSWORD: secret
+    networks:
+      - ticket-net
+    ports:
+      - "3306:3306"
+
+  ticket-app-container:
+    image: rahulsingh1207/ticket-booking:latest
+    container_name: ticket-app-container
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - mariadb-container
+    networks:
+      - ticket-net
+    ports:
+      - "8080:8080"
+
+networks:
+  ticket-net:
+    external: true

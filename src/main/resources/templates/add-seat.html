@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Seat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+            max-width: 700px;
+        }
+        .card {
+            border-radius: 20px;
+            box-shadow: 0px 8px 20px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #0d47a1;
+            font-weight: bold;
+        }
+        .btn-custom {
+            border-radius: 30px;
+            padding: 8px 20px;
+        }
+        label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card p-4">
+        <h2 class="mb-4">➕ Add Seat</h2>
+        <form th:action="@{/seats/save}" th:object="${seat}" method="post">
+            <div class="mb-3">
+                <label for="seatNumber" class="form-label">Seat Number</label>
+                <input type="text" th:field="*{seatNumber}" class="form-control" id="seatNumber" placeholder="Enter Seat Number" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="seatClass" class="form-label">Class</label>
+                <select th:field="*{seatClass}" class="form-select" id="seatClass" required>
+                    <option value="" disabled selected>Select Class</option>
+                    <option value="ECONOMY">🪑 Economy</option>
+                    <option value="BUSINESS">💼 Business</option>
+                    <option value="VIP">👑 VIP</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select th:field="*{status}" class="form-select" id="status">
+                    <option value="AVAILABLE">Available</option>
+                    <option value="BOOKED">Booked</option>
+                </select>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" th:field="*{available}" class="form-check-input" id="available">
+                <label class="form-check-label" for="available">Available</label>
+            </div>
+
+            <div class="mb-3">
+                <label for="schedule" class="form-label">Schedule</label>
+                <select th:field="*{schedule.id}" class="form-select" id="schedule" required>
+                    <option value="" disabled selected>Select Schedule</option>
+                    <option th:each="schedule : ${schedules}" 
+                            th:value="${schedule.id}" 
+                            th:text="${schedule.route.from} + ' → ' + ${schedule.route.destination} + ' | ₹' + ${schedule.price}"></option>
+                </select>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a th:href="@{/seats}" class="btn btn-secondary btn-custom">⬅ Back</a>
+                <button type="submit" class="btn btn-primary btn-custom">💾 Save Seat</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

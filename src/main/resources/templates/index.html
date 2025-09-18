@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Online Ticket Booking System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 min-h-screen flex items-center justify-center">
+
+<div class="max-w-5xl mx-auto p-10 bg-white rounded-2xl shadow-2xl">
+    <!-- Header -->
+    <div class="text-center mb-10">
+        <h1 class="text-4xl font-extrabold text-indigo-700">🎟 Online Ticket Booking System</h1>
+        <p class="mt-2 text-gray-600">Manage routes, schedules, seats, and bookings with ease</p>
+    </div>
+
+    <!-- Dashboard Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Users -->
+        <a th:href="@{/users}" 
+           class="bg-gradient-to-br from-blue-400 to-blue-600 text-white rounded-xl p-6 shadow-lg hover:scale-105 transform transition">
+            <h2 class="text-xl font-bold mb-2">👤 Users</h2>
+            <p>Manage all registered users</p>
+        </a>
+
+        <!-- Routes -->
+        <a th:href="@{/routes}" 
+           class="bg-gradient-to-br from-green-400 to-green-600 text-white rounded-xl p-6 shadow-lg hover:scale-105 transform transition">
+            <h2 class="text-xl font-bold mb-2">🛣 Routes</h2>
+            <p>Create and update travel routes</p>
+        </a>
+
+        <!-- Schedules -->
+        <a th:href="@{/schedules}" 
+           class="bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-xl p-6 shadow-lg hover:scale-105 transform transition">
+            <h2 class="text-xl font-bold mb-2">🕒 Schedules</h2>
+            <p>Plan and manage trip schedules</p>
+        </a>
+
+        <!-- Seats -->
+        <a th:href="@{/seats}" 
+           class="bg-gradient-to-br from-yellow-400 to-yellow-600 text-white rounded-xl p-6 shadow-lg hover:scale-105 transform transition">
+            <h2 class="text-xl font-bold mb-2">💺 Seats</h2>
+            <p>Assign and manage seats</p>
+        </a>
+
+        <!-- Bookings -->
+        <a th:href="@{/bookings}" 
+           class="bg-gradient-to-br from-pink-400 to-pink-600 text-white rounded-xl p-6 shadow-lg hover:scale-105 transform transition">
+            <h2 class="text-xl font-bold mb-2">📖 Bookings</h2>
+            <p>View and manage all bookings</p>
+        </a>
+
+        </div>
+
+    <!-- Footer -->
+    <div class="mt-10 text-center text-gray-500 text-sm">
+        <p>© 2025 Online Ticket Booking System. All rights reserved.</p>
+    </div>
+</div>
+
+</body>
+</html>
