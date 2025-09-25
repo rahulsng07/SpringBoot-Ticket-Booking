@@ -2,39 +2,45 @@ pipeline {
     agent any
 
     tools {
-        // Use the tool names you configured in Jenkins global tools
-        jdk 'Java-17'
-        maven 'Maven-3.9'
+        jdk 'Java-17'       // Make sure this matches the name in Jenkins Tools
+        maven 'Maven-3.9'   // Make sure this matches the name in Jenkins Tools
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the repository
-                git branch: 'main',
+                // Checkout code from GitHub
+                git branch: 'main', 
                     url: 'https://github.com/rahulsng07/SpringBoot-Ticket-Booking.git',
-                    credentialsId: 'github-pat'
+                    credentialsId: 'github-pat' // your GitHub PAT credential
             }
         }
 
         stage('Build') {
             steps {
                 // Run Maven build on Windows
-                bat 'mvn clean package -DskipTests'
+                bat "\"${tool 'Maven-3.9'}\\bin\\mvn\" clean package -DskipTests"
             }
         }
 
         stage('Test') {
             steps {
                 // Run tests if needed
-                bat 'mvn test'
+                bat "\"${tool 'Maven-3.9'}\\bin\\mvn\" test"
             }
         }
 
         stage('Archive') {
             steps {
-                // Archive built jar files
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                // Archive the built jar file
+                archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: true
+            }
+        }
+
+        stage('Deploy (Optional)') {
+            steps {
+                // Example deployment step
+                echo "You can add deployment commands here (Docker, Kubernetes, etc.)"
             }
         }
     }
@@ -44,7 +50,8 @@ pipeline {
             echo 'Build completed successfully!'
         }
         failure {
-            echo 'Build failed. Check logs!'
+            echo 'Build failed. Check console output for errors.'
         }
     }
 }
+
