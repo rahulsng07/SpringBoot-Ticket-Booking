@@ -1,8 +1,8 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven-3.9'   // Use the Maven installation name you set in Jenkins
-        jdk 'Java-17'       // Match the JDK installed in Jenkins
+        maven 'Maven-3.9'   // your Maven installation name
+        jdk 'Java-17'       // your JDK installation name
     }
     stages {
         stage('Checkout') {
@@ -14,12 +14,12 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                bat 'mvn clean package -DskipTests'
             }
         }
         stage('Test') {
             steps {
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
     }
