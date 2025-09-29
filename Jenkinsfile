@@ -8,8 +8,8 @@ pipeline {
     }
 
     tools {
-        maven 'Maven'   // Make sure your Jenkins Maven installation is named "Maven"
-        jdk 'Java 21'   // Make sure your Jenkins JDK installation is named "Java 21"
+        maven 'Maven-3.9'   // use the exact Maven name from Jenkins
+        jdk 'Java-17'       // use the exact JDK name from Jenkins
     }
 
     stages {
@@ -18,7 +18,7 @@ pipeline {
                 git(
                     url: 'https://github.com/rahulsng07/SpringBoot-Ticket-Booking.git',
                     branch: 'main',
-                    credentialsId: 'github-pat' // Your GitHub PAT credentials ID
+                    credentialsId: 'github-pat'
                 )
             }
         }
