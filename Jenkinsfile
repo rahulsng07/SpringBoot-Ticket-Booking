@@ -1,74 +1,56 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    DOCKER_REGISTRY = "docker.io/${DOCKER_USER}"
-    APP_NAME = "ticket-booking"
-    K8S_NAMESPACE = "ticket-system"
-    DEPLOYMENT_NAME = "ticket-app"
-    CONTAINER_NAME = "ticket-app"
-    DOCKER_CRED = 'docker-hub-cred'
-    KUBECONFIG_CRED = 'kubeconfig-cred'
-  }
+    environment {
+        DOCKER_IMAGE = "ticket-app:latest"
+        K8S_NAMESPACE = "ticket-system"
+    }
 
-  stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-        script {
-          GIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-          TAG = "${env.BUILD_NUMBER}-${GIT_SHORT}"
-          IMAGE = "${env.DOCKER_REGISTRY}/${env.APP_NAME}:${TAG}"
-          echo "Image will be: ${IMAGE}"
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/rahulsng07/SpringBoot-Ticket-Booking.git'
+            }
         }
-      }
-    }
 
-    stage('Build JAR') {
-      steps {
-        sh './mvnw clean package -DskipTests'
-      }
-    }
-
-    stage('Docker Build') {
-      steps {
-        sh "docker build -t ${IMAGE} ."
-      }
-    }
-
-    stage('Docker Push') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: DOCKER_CRED, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-          sh '''
-            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-            docker push ${IMAGE}
-            docker logout
-          '''
+        stage('Build JAR') {
+            steps {
+                echo 'Building Spring Boot JAR...'
+                sh 'mvn clean package -DskipTests'
+            }
         }
-      }
-    }
 
-    stage('Deploy to Kubernetes') {
-      steps {
-        withCredentials([file(credentialsId: KUBECONFIG_CRED, variable: 'KUBECONFIG_FILE')]) {
-          sh '''
-            export KUBECONFIG="$KUBECONFIG_FILE"
-            kubectl apply -f k8s/namespace.yaml || true
-            kubectl apply -f k8s/
-            kubectl -n ${K8S_NAMESPACE} set image deployment/${DEPLOYMENT_NAME} ${CONTAINER_NAME}=${IMAGE} --record
-            kubectl -n ${K8S_NAMESPACE} rollout status deployment/${DEPLOYMENT_NAME} --timeout=120s
-          '''
+        stage('Docker Build') {
+            steps {
+                echo "Building Docker image ${DOCKER_IMAGE}..."
+                sh "docker build -t ${DOCKER_IMAGE} ."
+            }
         }
-      }
-    }
-  }
 
-  post {
-    success {
-      echo "Deployment successful: ${IMAGE}"
+        stage('Docker Push') {
+            steps {
+                echo "Pushing Docker image ${DOCKER_IMAGE}..."
+                // Make sure your Docker is logged in if using a registry
+                sh "docker push ${DOCKER_IMAGE}"
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                echo "Deploying to Kubernetes namespace ${K8S_NAMESPACE}..."
+                sh "kubectl apply -f k8s/ -n ${K8S_NAMESPACE}"
+            }
+        }
     }
-    failure {
-      echo "Build or deploy failed."
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check logs!'
+        }
     }
-  }
 }
