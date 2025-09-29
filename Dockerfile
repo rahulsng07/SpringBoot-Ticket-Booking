@@ -1,14 +1,13 @@
-# Use official OpenJDK 17 slim image
-FROM openjdk:17-jdk-slim
-
-# Set working directory inside container
+# stage 1: build with Maven Wrapper
+FROM maven:3.8.7-openjdk-17 AS build
 WORKDIR /app
+COPY . .
+RUN ./mvnw -q -DskipTests package
 
-# Copy the built JAR file into the container
-COPY target/ticket-booking.jar ticket-booking.jar
-
-# Expose the port your Spring Boot app runs on
+# stage 2: runtime image
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
+ARG JAR_FILE=target/*.jar
+COPY --from=build /app/${JAR_FILE} app.jar
 EXPOSE 8080
-
-# Run the JAR file
-ENTRYPOINT ["java", "-jar", "ticket-booking.jar"]
+ENTRYPOINT ["java","-jar","/app.jar"]
