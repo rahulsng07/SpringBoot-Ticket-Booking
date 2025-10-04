@@ -1,17 +1,21 @@
 pipeline {
     agent any
 
+    environment {
+        // Use the Docker daemon exposed over TCP
+        DOCKER_HOST = 'tcp://localhost:2375'
+        DOCKER_IMAGE = 'rahulsng07/ticket-booking:latest'
+    }
+
     tools {
+        // Match your Jenkins-installed tools
         jdk 'Java-17'
         maven 'Maven-3.9'
     }
 
-    environment {
-        DOCKER_IMAGE = "rahulsng07/ticket-booking:${env.BUILD_NUMBER}"
-    }
-
     stages {
-        stage('Checkout') {
+
+        stage('Checkout SCM') {
             steps {
                 checkout scm
             }
@@ -19,14 +23,9 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo '🔨 Building JAR using Maven...'
-                // Use Windows batch command
+                echo '⚡ Building JAR using Maven...'
                 bat 'mvnw.cmd clean package -DskipTests'
-            }
-            post {
-                success {
-                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-                }
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
 
@@ -39,25 +38,15 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                echo '📤 Pushing Docker image to Docker Hub...'
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat '''
-                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-                        docker push %DOCKER_IMAGE%
-                    '''
-                }
+                echo '📤 Pushing Docker image to registry...'
+                bat "docker push %DOCKER_IMAGE%"
             }
         }
 
         stage('Deploy to Kubernetes') {
-            when {
-                expression { fileExists('k8s') }
-            }
             steps {
-                echo '🚀 Deploying to Kubernetes...'
-                withCredentials([file(credentialsId: 'kubeconfig-id', variable: 'KUBECONFIG')]) {
-                    bat 'kubectl --kubeconfig=%KUBECONFIG% apply -f k8s\\'
-                }
+                echo '☸️ Deploying to Kubernetes...'
+                bat "kubectl apply -f k8s/"
             }
         }
     }
@@ -67,7 +56,7 @@ pipeline {
             echo '✅ Pipeline completed successfully!'
         }
         failure {
-            echo '❌ Pipeline failed. Please check logs!'
+            echo '❌ Pipeline failed. Check logs!'
         }
     }
 }
