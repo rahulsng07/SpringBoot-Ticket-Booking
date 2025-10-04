@@ -1,63 +1,73 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = "rahulsng07/ticket-app:latest"
-        KUBE_CONFIG = "C:/Users/rahul/.kube/config" // Update if your kubeconfig is elsewhere
+    tools {
+        jdk 'JDK21'
+        maven 'Maven3'
     }
 
-    tools {
-        maven 'Maven-3.9'   // Make sure your Jenkins Maven installation matches this name
-        jdk 'Java-17'       // Use your installed JDK name in Jenkins
+    environment {
+        DOCKER_IMAGE = "rahulsng07/ticket-booking:${env.BUILD_NUMBER}"
     }
 
     stages {
-
-        stage('Checkout SCM') {
+        stage('Checkout') {
             steps {
-                git url: 'https://github.com/rahulsng07/SpringBoot-Ticket-Booking.git', branch: 'main', credentialsId: 'github-pat'
+                checkout scm
             }
         }
 
-        stage('Build JAR') {
+        stage('Build') {
             steps {
-                echo 'Building Spring Boot JAR...'
-                bat 'mvn clean package -DskipTests'
+                echo '🔨 Building JAR using Maven...'
+                sh './mvnw clean package -DskipTests'
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                }
             }
         }
 
         stage('Docker Build') {
             steps {
-                echo 'Building Docker image...'
-                bat "docker build -t %DOCKER_IMAGE% ."
+                echo '🐳 Building Docker image...'
+                sh "docker build -t ${DOCKER_IMAGE} ."
             }
         }
 
         stage('Docker Push') {
             steps {
-                echo 'Pushing Docker image to Docker Hub...'
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat "echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin"
-                    bat "docker push %DOCKER_IMAGE%"
+                echo '📤 Pushing Docker image to Docker Hub...'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push ${DOCKER_IMAGE}
+                    '''
                 }
             }
         }
 
         stage('Deploy to Kubernetes') {
+            when {
+                expression { fileExists('k8s') }
+            }
             steps {
-                echo 'Deploying to Kubernetes...'
-                bat "kubectl --kubeconfig=%KUBE_CONFIG% apply -f k8s/"
+                echo '🚀 Deploying to Kubernetes...'
+                withCredentials([file(credentialsId: 'kubeconfig-id', variable: 'KUBECONFIG')]) {
+                    sh 'kubectl --kubeconfig=$KUBECONFIG apply -f k8s/'
+                }
             }
         }
-
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo '✅ Pipeline completed successfully!'
         }
         failure {
-            echo 'Pipeline failed. Check logs!'
+            echo '❌ Pipeline failed. Please check logs!'
         }
     }
 }
+
