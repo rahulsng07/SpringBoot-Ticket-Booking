@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     // Tools configuration
-    tools {
-        jdk 'OpenJDK 17'          // Ensure this is configured in Jenkins
-        maven 'Maven 3.9'      // Ensure this is configured in Jenkins
-        git 'Default'             // Ensure Git is configured
-    }
+tools {
+    jdk 'Java-17'         // Name of the JDK configured in Jenkins
+    maven 'Maven-3.9'     // Name of the Maven configured in Jenkins
+    git 'Default'         // Git installation name
+}
 
     environment {
         DOCKER_IMAGE = 'rahulsng07/ticket-booking:latest'
