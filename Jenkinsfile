@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-    jdk 'Java-17'
-    maven 'Maven-3.9'
+        jdk 'Java-17'
+        maven 'Maven-3.9'
     }
 
     environment {
@@ -20,7 +20,8 @@ pipeline {
         stage('Build') {
             steps {
                 echo '🔨 Building JAR using Maven...'
-                sh './mvnw clean package -DskipTests'
+                // Use Windows batch command
+                bat 'mvnw.cmd clean package -DskipTests'
             }
             post {
                 success {
@@ -32,7 +33,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 echo '🐳 Building Docker image...'
-                sh "docker build -t ${DOCKER_IMAGE} ."
+                bat "docker build -t %DOCKER_IMAGE% ."
             }
         }
 
@@ -40,9 +41,9 @@ pipeline {
             steps {
                 echo '📤 Pushing Docker image to Docker Hub...'
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push ${DOCKER_IMAGE}
+                    bat '''
+                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                        docker push %DOCKER_IMAGE%
                     '''
                 }
             }
@@ -55,7 +56,7 @@ pipeline {
             steps {
                 echo '🚀 Deploying to Kubernetes...'
                 withCredentials([file(credentialsId: 'kubeconfig-id', variable: 'KUBECONFIG')]) {
-                    sh 'kubectl --kubeconfig=$KUBECONFIG apply -f k8s/'
+                    bat 'kubectl --kubeconfig=%KUBECONFIG% apply -f k8s\\'
                 }
             }
         }
@@ -70,4 +71,3 @@ pipeline {
         }
     }
 }
-
