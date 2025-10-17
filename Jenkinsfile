@@ -1,10 +1,9 @@
 pipeline {
     agent any
-
-    tools {
-        maven 'Maven_3.9'   // Use your configured Maven name in Jenkins
-        jdk 'JDK21'         // Use your configured JDK name in Jenkins
-    }
+tools {
+    maven 'Maven-3.9'
+    jdk 'Java-17'
+}
 
     environment {
         IMAGE_NAME = "rahulsng07/ticket-booking:latest"
