@@ -2,58 +2,63 @@ pipeline {
     agent any
 
     tools {
-        jdk 'Java-17'         // Make sure this is installed in Jenkins
-        maven 'Maven-3.9'     // Make sure this is installed in Jenkins
+        maven 'Maven_3.9'   // Use your configured Maven name in Jenkins
+        jdk 'JDK21'         // Use your configured JDK name in Jenkins
     }
 
     environment {
-        DOCKER_IMAGE = "rahulsng07/ticket-booking:latest"
+        IMAGE_NAME = "rahulsng07/ticket-booking:latest"
+        K8S_DIR = "k8s"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo "🔄 Checking out source code from Git..."
+                echo '📥 Checking out source code...'
                 checkout scm
             }
         }
 
         stage('Build JAR') {
             steps {
-                echo "⚡ Building Spring Boot JAR using Maven..."
-                sh './mvnw clean package -DskipTests'
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                echo '⚡ Building Spring Boot JAR using Maven...'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('Docker Build') {
             steps {
-                echo "🐳 Building Docker image..."
-                sh "docker build -t ${DOCKER_IMAGE} ."
+                echo '🐳 Building Docker image...'
+                sh "docker build -t ${IMAGE_NAME} ."
             }
         }
 
         stage('Docker Push') {
             steps {
-                echo "🚀 Pushing Docker image to Docker Hub..."
-                sh "docker push ${DOCKER_IMAGE}"
+                echo '🚀 Pushing image to Docker Hub...'
+                withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u rahulsng07 --password-stdin
+                        docker push ${IMAGE_NAME}
+                    '''
+                }
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                echo "📦 Deploying to Kubernetes..."
-                sh "kubectl apply -f k8s/"
+                echo '☸️ Deploying to Kubernetes...'
+                sh "kubectl apply -f ${K8S_DIR}/"
             }
         }
     }
 
     post {
         success {
-            echo "✅ Pipeline completed successfully!"
+            echo '✅ Pipeline completed successfully!'
         }
         failure {
-            echo "❌ Pipeline failed! Check logs."
+            echo '❌ Pipeline failed — check logs for details.'
         }
     }
 }
