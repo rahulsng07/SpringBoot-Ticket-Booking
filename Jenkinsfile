@@ -1,44 +1,40 @@
 pipeline {
     agent any
-tools {
-    maven 'Maven-3.9'
-    jdk 'Java-17'
-}
+
+    tools {
+        maven '3.8.7'
+        jdk 'JDK21'
+    }
 
     environment {
-        IMAGE_NAME = "rahulsng07/ticket-booking:latest"
-        K8S_DIR = "k8s"
+        DOCKER_IMAGE = "rahulsingh1207/ticket-booking:latest"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo '📥 Checking out source code...'
-                checkout scm
+                git branch: 'main', url: 'https://github.com/rahulsng07/SpringBoot-Ticket-Booking.git'
             }
         }
 
-        stage('Build JAR') {
+        stage('Build with Maven') {
             steps {
-                echo '⚡ Building Spring Boot JAR using Maven...'
                 sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Docker Build') {
+        stage('Build Docker Image') {
             steps {
-                echo '🐳 Building Docker image...'
-                sh "docker build -t ${IMAGE_NAME} ."
+                sh 'docker build -t $DOCKER_IMAGE .'
             }
         }
 
-        stage('Docker Push') {
+        stage('Push Docker Image') {
             steps {
-                echo '🚀 Pushing image to Docker Hub...'
-                withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKER_PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh '''
-                        echo "$DOCKER_PASS" | docker login -u rahulsng07 --password-stdin
-                        docker push ${IMAGE_NAME}
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push $DOCKER_IMAGE
                     '''
                 }
             }
@@ -46,18 +42,19 @@ tools {
 
         stage('Deploy to Kubernetes') {
             steps {
-                echo '☸️ Deploying to Kubernetes...'
-                sh "kubectl apply -f ${K8S_DIR}/"
+                sh '''
+                    kubectl apply -f k8s/configmap.yaml
+                    kubectl apply -f k8s/deployment.yaml
+                    kubectl apply -f k8s/service.yaml
+                '''
             }
         }
     }
 
     post {
-        success {
-            echo '✅ Pipeline completed successfully!'
-        }
-        failure {
-            echo '❌ Pipeline failed — check logs for details.'
+        always {
+            echo 'Cleaning up workspace...'
+            cleanWs()
         }
     }
 }
