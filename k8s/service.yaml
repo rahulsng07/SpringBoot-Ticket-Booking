@@ -2,7 +2,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ticket-app-service
-  namespace: ticket-system
 spec:
   selector:
     app: ticket-app
@@ -10,4 +9,4 @@ spec:
     - protocol: TCP
       port: 8080
       targetPort: 8080
-  type: ClusterIP
+  type: NodePort

@@ -1,11 +1,21 @@
-# stage 1: build with Maven Wrapper
-FROM maven:3.8.7-openjdk-17 AS build
+# Stage 1: build
+FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
-COPY . .
+
+# Copy Maven wrapper and project
+COPY mvnw ./mvnw
+COPY .mvn ./.mvn
+COPY pom.xml ./pom.xml
+COPY src ./src
+
+# Ensure mvnw is executable
+RUN chmod +x mvnw
+
+# Build jar
 RUN ./mvnw -q -DskipTests package
 
-# stage 2: runtime image
-FROM eclipse-temurin:17-jre-jammy
+# Stage 2: runtime
+FROM eclipse-temurin:17-jre
 WORKDIR /app
 ARG JAR_FILE=target/*.jar
 COPY --from=build /app/${JAR_FILE} app.jar
