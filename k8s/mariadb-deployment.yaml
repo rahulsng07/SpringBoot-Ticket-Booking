@@ -1,7 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mariadb-deployment
+  name: mariadb
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -19,9 +20,12 @@ spec:
             - containerPort: 3306
           env:
             - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mariadb-secret
-                  key: rootpassword
+              value: root
             - name: MYSQL_DATABASE
               value: ticketdb
+          volumeMounts:
+            - name: mariadb-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mariadb-storage
+          emptyDir: {}  # ✅ works fine for Minikube/WSL2

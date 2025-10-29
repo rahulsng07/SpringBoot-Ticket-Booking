@@ -1,11 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ticket-app-deployment
-  labels:
-    app: ticket-app
+  name: ticket-app
+  namespace: default
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: ticket-app
@@ -16,19 +15,10 @@ spec:
     spec:
       containers:
         - name: ticket-app
-          image: rahulsingh1207/ticket-booking:latest
+          image: rahulsingh1207/ticket-booking:latest  # ✅ your DockerHub image
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
-          env:
-            - name: SPRING_DATASOURCE_URL
-              value: jdbc:mariadb://mariadb-service:3306/ticketdb
-            - name: SPRING_DATASOURCE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mariadb-secret
-                  key: username
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mariadb-secret
-                  key: password
+          envFrom:
+            - configMapRef:
+                name: ticket-app-config
