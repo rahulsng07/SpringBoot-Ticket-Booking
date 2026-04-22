@@ -1,4 +1,4 @@
-#Pipline script for maven , sonarqube, nexus, Tomcat.
+# Pipline script for maven , sonarqube, nexus, Tomcat.
 pipeline {
     agent any
 
